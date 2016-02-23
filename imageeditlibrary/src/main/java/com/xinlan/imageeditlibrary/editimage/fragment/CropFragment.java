@@ -206,8 +206,7 @@ public class CropFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			dialog = BaseActivity.getLoadingDialog(getActivity(), "图片生成中...",
-					false);
+			dialog = BaseActivity.getLoadingDialog(getActivity(), "图片生成中...", false);
 			dialog.show();
 		}
 

@@ -1,68 +1,62 @@
 package com.xinlan.imageeditlibrary.editimage.fragment;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ViewFlipper;
+import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.xinlan.imageeditlibrary.BaseActivity;
 import com.xinlan.imageeditlibrary.R;
 import com.xinlan.imageeditlibrary.editimage.EditImageActivity;
-import com.xinlan.imageeditlibrary.editimage.adapter.StickerAdapter;
-import com.xinlan.imageeditlibrary.editimage.adapter.StickerTypeAdapter;
 import com.xinlan.imageeditlibrary.editimage.model.StickerBean;
 import com.xinlan.imageeditlibrary.editimage.utils.Matrix3;
+import com.xinlan.imageeditlibrary.editimage.view.LabelTextView;
 import com.xinlan.imageeditlibrary.editimage.view.StickerItem;
-import com.xinlan.imageeditlibrary.editimage.view.StickerView;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * 贴图分类fragment
  *
  * @author panyi
  */
-public class StirckerFragment extends Fragment {
-    public static final String TAG = StirckerFragment.class.getName();
+public class TextFragment extends Fragment {
+    public static final String TAG = TextFragment.class.getName();
     public static final String STICKER_FOLDER = "stickers";
 
     private View mainView;
     private EditImageActivity activity;
-    private ViewFlipper flipper;
-    private View backToMenu;// 返回主菜单
-    private RecyclerView typeList;// 贴图分类列表
-    private RecyclerView stickerList;// 贴图素材列表
-    private View backToType;// 返回类型选择
-    private StickerView mStickerView;// 贴图显示控件
-    private StickerAdapter mStickerAdapter;// 贴图列表适配器
+    private LabelTextView mLableTextView;// 贴图显示控件
+
+    private Button btn;
 
     private LoadStickersTask mLoadStickersTask;
     private List<StickerBean> stickerBeanList = new ArrayList<StickerBean>();
 
-    public static StirckerFragment newInstance(EditImageActivity activity) {
-        StirckerFragment fragment = new StirckerFragment();
+    public static TextFragment newInstance(EditImageActivity activity) {
+        TextFragment fragment = new TextFragment();
         fragment.activity = activity;
         return fragment;
     }
@@ -75,49 +69,23 @@ public class StirckerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mainView = inflater.inflate(R.layout.fragment_edit_image_sticker_type,
+        mainView = inflater.inflate(R.layout.fragment_edit_image_text,
                 null);
-        this.mStickerView = activity.mStickerView;
-        flipper = (ViewFlipper) mainView.findViewById(R.id.flipper);
-        flipper.setInAnimation(activity, R.anim.in_bottom_to_top);
-        flipper.setOutAnimation(activity, R.anim.out_bottom_to_top);
+        this.mLableTextView = activity.mTextPanel;
 
-        //
-        backToMenu = mainView.findViewById(R.id.back_to_main);
-        typeList = (RecyclerView) mainView
-                .findViewById(R.id.stickers_type_list);
-        typeList.setHasFixedSize(true);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(activity);
-        mLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        typeList.setLayoutManager(mLayoutManager);
-        typeList.setAdapter(new StickerTypeAdapter(this));
-        backToType = mainView.findViewById(R.id.back_to_type);// back按钮
-
-        stickerList = (RecyclerView) mainView.findViewById(R.id.stickers_list);
-        // stickerList.setHasFixedSize(true);
-        LinearLayoutManager stickerListLayoutManager = new LinearLayoutManager(
-                activity);
-        stickerListLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        stickerList.setLayoutManager(stickerListLayoutManager);
-        mStickerAdapter = new StickerAdapter(this);
-        stickerList.setAdapter(mStickerAdapter);
-
-        //loadStickersData();
-
+        btn = (Button) mainView.findViewById(R.id.btn);
+        btn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectedStickerItem("stickers/dongwu/1dongwu1.png.svntmp");
+            }
+        });
         return mainView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        backToMenu.setOnClickListener(new BackToMenuClick());// 返回主菜单
-        backToType.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {// 返回上一级列表
-                flipper.showPrevious();
-            }
-        });
     }
 
     //导入贴图数据
@@ -152,8 +120,8 @@ public class StirckerFragment extends Fragment {
             stickerBeanList.clear();
             AssetManager assetManager = getActivity().getAssets();
             try {
-                String[] lists =   assetManager.list(STICKER_FOLDER);
-                for(String parentPath:lists){
+                String[] lists = assetManager.list(STICKER_FOLDER);
+                for (String parentPath : lists) {
 
                 }//end for each
             } catch (IOException e) {
@@ -186,33 +154,55 @@ public class StirckerFragment extends Fragment {
     }
 
     /**
-     * 跳转至贴图详情列表
-     *
-     * @param path
-     */
-    public void swipToStickerDetails(String path) {
-        mStickerAdapter.addStickerImages(path);
-        flipper.showNext();
-    }
-
-    /**
      * 从Assert文件夹中读取位图数据
      *
-     * @param fileName
      * @return
      */
-    private Bitmap getImageFromAssetsFile(String fileName) {
-        Log.e("---filename ---","  "+fileName);
-        Bitmap image = null;
-        AssetManager am = getResources().getAssets();
-        try {
-            InputStream is = am.open(fileName);
-            image = BitmapFactory.decodeStream(is);
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private Bitmap drawToBitmap(String text) {
+
+        TextView tempTextView = new TextView(activity);
+        tempTextView.setText("哈哈这是测试");
+        tempTextView.setBackgroundResource(R.drawable.icon_biaoqian);
+        tempTextView.setTextSize(10f);
+        tempTextView.setTextColor(Color.WHITE);
+        tempTextView.setGravity(Gravity.CENTER_VERTICAL);
+        tempTextView.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+
+        if (tempTextView.getWidth() == 0 || tempTextView.getHeight() == 0) {//若是布局没有显示出来，先自己计算长宽
+            int measuredWidth = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            int measuredHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            // validate view.measurewidth and view.measureheight
+            tempTextView.measure(measuredWidth, measuredHeight);
+            tempTextView.layout(0, 0, tempTextView.getMeasuredWidth(), tempTextView.getMeasuredHeight());
         }
-        return image;
+        tempTextView.setDrawingCacheEnabled(true);
+        Bitmap bitmap = tempTextView.getDrawingCache();
+
+        if (bitmap == null) return null;
+        final Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
+                Bitmap.Config.ARGB_8888);
+
+        Canvas cv = new Canvas(newBitmap);
+        RectF dst = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        try {
+            //截图将图片截取出来
+            cv.drawBitmap(bitmap, null, dst, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //清除
+            tempTextView.setDrawingCacheEnabled(false);
+        }
+        return newBitmap;
+    }
+
+    public LabelTextView getmLableTextView() {
+        return mLableTextView;
+    }
+
+    public void setmLableTextView(LabelTextView mLableTextView) {
+        this.mLableTextView = mLableTextView;
     }
 
     /**
@@ -221,15 +211,7 @@ public class StirckerFragment extends Fragment {
      * @param path
      */
     public void selectedStickerItem(String path) {
-        mStickerView.addBitImage(getImageFromAssetsFile(path));
-    }
-
-    public StickerView getmStickerView() {
-        return mStickerView;
-    }
-
-    public void setmStickerView(StickerView mStickerView) {
-        this.mStickerView = mStickerView;
+        mLableTextView.addBitImage(drawToBitmap("123456"));
     }
 
     /**
@@ -247,16 +229,15 @@ public class StirckerFragment extends Fragment {
     public void backToMain() {
         activity.mode = EditImageActivity.MODE_NONE;
         activity.bottomGallery.setCurrentItem(0);
-        mStickerView.setVisibility(View.GONE);
+        mLableTextView.setVisibility(View.GONE);
         activity.bannerFlipper.showPrevious();
     }
 
     /**
      * 保存贴图任务
-     *
      * @author panyi
      */
-    private final class SaveStickersTask extends
+    private final class SaveTextTask extends
             AsyncTask<Bitmap, Void, Bitmap> {
         private Dialog dialog;
 
@@ -276,8 +257,7 @@ public class StirckerFragment extends Fragment {
             Matrix m = new Matrix();
             m.setValues(inverseMatrix.getValues());
 
-            LinkedHashMap<Integer, StickerItem> addItems = mStickerView
-                    .getBank();
+            LinkedHashMap<Integer, StickerItem> addItems = mLableTextView.getBank();
             for (Integer id : addItems.keySet()) {
                 StickerItem item = addItems.get(id);
                 item.matrix.postConcat(m);// 乘以底部图片变化矩阵
@@ -303,7 +283,7 @@ public class StirckerFragment extends Fragment {
         @Override
         protected void onPostExecute(Bitmap result) {
             super.onPostExecute(result);
-            mStickerView.clear();
+            mLableTextView.clear();
             activity.changeMainBitmap(result);
             dialog.dismiss();
         }
@@ -320,9 +300,9 @@ public class StirckerFragment extends Fragment {
     /**
      * 保存贴图层 合成一张图片
      */
-    public void saveStickers() {
+    public void saveTextSticker() {
         // System.out.println("保存 合成图片");
-        SaveStickersTask task = new SaveStickersTask();
+        SaveTextTask task = new SaveTextTask();
         task.execute(activity.mainBitmap);
     }
 
@@ -330,7 +310,6 @@ public class StirckerFragment extends Fragment {
      * 保存Bitmap图片到指定文件
      *
      * @param bm
-     * @param name
      */
     public static void saveBitmap(Bitmap bm, String filePath) {
         File f = new File(filePath);

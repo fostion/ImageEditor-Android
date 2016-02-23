@@ -99,6 +99,12 @@
             android:layout_height="fill_parent"
             android:layout_gravity="center"
             android:visibility="gone" />
+        <com.xinlan.imageeditlibrary.editimage.view.LabelTextView
+            android:id="@+id/text_panel"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:visibility="gone" />
     </FrameLayout>
 
 </RelativeLayout>

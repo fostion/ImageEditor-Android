@@ -3,6 +3,7 @@ package com.xinlan.imageeditlibrary.editimage.fragment;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,6 +29,7 @@ public class MainMenuFragment extends Fragment {
 	private View fliterBtn;// 滤镜按钮
 	private View cropBtn;// 剪裁按钮
 	private View rotateBtn;// 旋转按钮
+	private View textBtn;//添加文字按钮
 
 	public static MainMenuFragment newInstance(EditImageActivity activity) {
 		MainMenuFragment fragment = new MainMenuFragment();
@@ -49,6 +51,7 @@ public class MainMenuFragment extends Fragment {
 		fliterBtn = mainView.findViewById(R.id.btn_fliter);
 		cropBtn = mainView.findViewById(R.id.btn_crop);
 		rotateBtn = mainView.findViewById(R.id.btn_rotate);
+		textBtn = mainView.findViewById(R.id.btn_font);
 		return mainView;
 	}
 
@@ -60,6 +63,7 @@ public class MainMenuFragment extends Fragment {
 		fliterBtn.setOnClickListener(new FliterClick());
 		cropBtn.setOnClickListener(new CropClick());
 		rotateBtn.setOnClickListener(new RotateClick());
+		textBtn.setOnClickListener(new TextClick());
 	}
 
 	/**
@@ -145,4 +149,21 @@ public class MainMenuFragment extends Fragment {
 		}
 	}// end inner class
 
+	/**
+	 * 图片旋转模式
+	 *
+	 * @author panyi
+	 *
+	 */
+	private final class TextClick implements OnClickListener {
+		@Override
+		public void onClick(View v) {
+			Log.e("----","点击添加文字");
+			activity.mode = EditImageActivity.MODE_TEXT;
+			activity.mTextFragment.getmLableTextView().setVisibility(
+					View.VISIBLE);
+			activity.bottomGallery.setCurrentItem(5);
+			activity.bannerFlipper.showNext();
+		}
+	}// end inner class
 }// end class

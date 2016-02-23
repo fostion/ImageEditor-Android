@@ -4,6 +4,9 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -12,8 +15,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.xinlan.imageeditlibrary.editimage.EditImageActivity;
@@ -37,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
     private int imageWidth, imageHeight;//
     private String path;
 
+    private RelativeLayout srcText;
+    private ImageView targetText;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,11 +65,59 @@ public class MainActivity extends AppCompatActivity {
 
         openAblum.setOnClickListener(new SelectClick());
         editImage.setOnClickListener(new EditImageClick());
+
+        srcText = (RelativeLayout) findViewById(R.id.srcText);
+        targetText = (ImageView) findViewById(R.id.targetText);
+
+        TextView myTextView = new TextView(this);
+        myTextView.setText("哈哈这是测试");
+        myTextView.setBackgroundResource(R.drawable.icon_biaoqian);
+        myTextView.setTextSize(10f);
+        myTextView.setTextColor(Color.WHITE);
+        myTextView.setGravity(Gravity.CENTER_VERTICAL);
+        myTextView.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT));
+
+        targetText.setImageBitmap(captureView(myTextView));
+    }
+
+    /**
+     * 获取view里面截图
+     *
+     * @param view
+     * @return
+     */
+    public Bitmap captureView(View view) {
+        if (view.getWidth() == 0 || view.getHeight() == 0) {//若是布局没有显示出来，先自己计算长宽
+            int measuredWidth = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            int measuredHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            // validate view.measurewidth and view.measureheight
+            view.measure(measuredWidth, measuredHeight);
+            view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        }
+        view.setDrawingCacheEnabled(true);
+        Bitmap bitmap = view.getDrawingCache();
+
+        if (bitmap == null) return null;
+        final Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
+                Bitmap.Config.ARGB_8888);
+
+        Canvas cv = new Canvas(newBitmap);
+        RectF dst = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        try {
+            //截图将图片截取出来
+            cv.drawBitmap(bitmap, null, dst, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //清除
+            view.setDrawingCacheEnabled(false);
+        }
+        return newBitmap;
     }
 
     /**
      * 编辑选择的图片
-     *
      * @author panyi
      */
     private final class EditImageClick implements View.OnClickListener {
@@ -173,12 +230,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (height > reqHeight || width > reqWidth) {
             if (width > height) {
-                inSampleSize = (int) FloatMath
+                inSampleSize = (int) Math
                         .floor(((float) height / reqHeight) + 0.5f); // Math.round((float)height
                 // /
                 // (float)reqHeight);
             } else {
-                inSampleSize = (int) FloatMath
+                inSampleSize = (int) Math
                         .floor(((float) width / reqWidth) + 0.5f); // Math.round((float)width
                 // /
                 // (float)reqWidth);

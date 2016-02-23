@@ -57,4 +57,17 @@
         android:textColor="#ffffff"
         android:textSize="@dimen/image_edit_text_size" />
 
+    <TextView
+        android:id="@+id/btn_font"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:drawablePadding="@dimen/image_edit_text_padding"
+        android:drawableTop="@drawable/image_edit_icon_text"
+        android:gravity="center"
+        android:text="@string/font"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/image_edit_text_size" />
+
 </LinearLayout>

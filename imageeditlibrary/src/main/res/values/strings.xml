@@ -2,11 +2,12 @@
     <string name="app_name">ImageEditLibrary</string>
     <string name="no_images">no found the image</string>
     <string name="images">%d images</string>
-    <string name="save">save</string>
-    <string name="apply">apply</string>
+    <string name="save">保存</string>
+    <string name="apply">添加</string>
 
-    <string name="stickers">stickers</string>
-    <string name="fliter">fliter</string>
-    <string name="crop">crop</string>
-    <string name="rotate">rotate</string>
+    <string name="stickers">贴图</string>
+    <string name="fliter">过滤</string>
+    <string name="crop">截取</string>
+    <string name="rotate">旋转</string>
+    <string name="font">文字</string>
 </resources>

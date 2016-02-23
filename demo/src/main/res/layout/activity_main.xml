@@ -26,6 +26,34 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/edit_image" />
+
+
+        <RelativeLayout
+            android:id="@+id/srcText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:maxLength="8"
+                android:textSize="10sp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="哈哈这是测试"
+                android:visibility="invisible"
+                android:background="@drawable/icon_biaoqian"/>
+        </RelativeLayout>
+
+
+        <ImageView
+            android:id="@+id/targetText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
     </LinearLayout>
 
 </ScrollView>

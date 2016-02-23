@@ -100,12 +100,12 @@ public class BitmapUtils {
 
 		if (height > reqHeight || width > reqWidth) {
 			if (width > height) {
-				inSampleSize = (int) FloatMath
+				inSampleSize = (int) Math
 						.floor(((float) height / reqHeight) + 0.5f); // Math.round((float)height
 																		// /
 																		// (float)reqHeight);
 			} else {
-				inSampleSize = (int) FloatMath
+				inSampleSize = (int) Math
 						.floor(((float) width / reqWidth) + 0.5f); // Math.round((float)width
 																	// /
 																	// (float)reqWidth);
@@ -132,8 +132,8 @@ public class BitmapUtils {
 			int originalHeight, int numPixels) {
 		float ratio = (float) originalWidth / originalHeight;
 
-		int scaledHeight = (int) FloatMath.sqrt((float) numPixels / ratio);
-		int scaledWidth = (int) (ratio * FloatMath.sqrt((float) numPixels
+		int scaledHeight = (int) Math.sqrt((float) numPixels / ratio);
+		int scaledWidth = (int) (ratio * Math.sqrt((float) numPixels
 				/ ratio));
 
 		return new BitmapSize(scaledWidth, scaledHeight);
