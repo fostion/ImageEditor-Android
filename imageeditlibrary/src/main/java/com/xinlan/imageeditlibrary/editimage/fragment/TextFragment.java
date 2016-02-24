@@ -2,29 +2,36 @@ package com.xinlan.imageeditlibrary.editimage.fragment;
 
 import android.annotation.TargetApi;
 import android.app.Dialog;
-import android.content.res.AssetManager;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xinlan.imageeditlibrary.BaseActivity;
 import com.xinlan.imageeditlibrary.R;
 import com.xinlan.imageeditlibrary.editimage.EditImageActivity;
-import com.xinlan.imageeditlibrary.editimage.model.StickerBean;
+import com.xinlan.imageeditlibrary.editimage.adapter.FontTypeAdapter;
 import com.xinlan.imageeditlibrary.editimage.utils.Matrix3;
 import com.xinlan.imageeditlibrary.editimage.view.LabelTextView;
 import com.xinlan.imageeditlibrary.editimage.view.StickerItem;
@@ -44,16 +51,21 @@ import java.util.List;
  */
 public class TextFragment extends Fragment {
     public static final String TAG = TextFragment.class.getName();
-    public static final String STICKER_FOLDER = "stickers";
+    public static final String FONT_FOLDER = "fonts";
 
     private View mainView;
     private EditImageActivity activity;
-    private LabelTextView mLableTextView;// 贴图显示控件
+    private LabelTextView mLableTextView;// 文字显示控件
+    private RecyclerView recyclerView;
+    private FontTypeAdapter fontTypeAdapter;
+    private View backToMenu;// 返回主菜单
+    private List<String> fonts = new ArrayList<>();
 
-    private Button btn;
-
-    private LoadStickersTask mLoadStickersTask;
-    private List<StickerBean> stickerBeanList = new ArrayList<StickerBean>();
+    private AlertDialog inputDialog;
+    private View dialogView;
+    private EditText input;
+    private Button sureBtn;
+    private Typeface inputTypeFace;
 
     public static TextFragment newInstance(EditImageActivity activity) {
         TextFragment fragment = new TextFragment();
@@ -69,106 +81,103 @@ public class TextFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mainView = inflater.inflate(R.layout.fragment_edit_image_text,
-                null);
+        mainView = inflater.inflate(R.layout.fragment_edit_image_text, null);
         this.mLableTextView = activity.mTextPanel;
 
-        btn = (Button) mainView.findViewById(R.id.btn);
-        btn.setOnClickListener(new OnClickListener() {
+        backToMenu = mainView.findViewById(R.id.back_to_main);
+        recyclerView = (RecyclerView) mainView.findViewById(R.id.font_type_list);
+
+        fontTypeAdapter = new FontTypeAdapter(activity.getAssets(), fonts);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(activity);
+        mLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setAdapter(fontTypeAdapter);
+        fontTypeAdapter.setOnItemClickListener(new FontTypeAdapter.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                selectedStickerItem("stickers/dongwu/1dongwu1.png.svntmp");
+            public void onItemClick(Typeface typeface) {
+                if (typeface != null) {
+                    inputTypeFace = typeface;
+                    showDialog();
+                }
             }
         });
         return mainView;
     }
 
+    public void showDialog() {
+        if (inputDialog == null) {
+            dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_input, null);
+            input = (EditText) dialogView.findViewById(R.id.input);
+            sureBtn = (Button) dialogView.findViewById(R.id.sureBtn);
+            sureBtn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!TextUtils.isEmpty(input.getText().toString())) {
+                        selectedStickerItem(inputTypeFace, input.getText().toString());
+                        input.setText("");
+                        inputDialog.dismiss();
+                    } else {
+                        Toast.makeText(activity, "输入内容不为空", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            inputDialog = new AlertDialog.Builder(activity)
+                    .setView(dialogView)
+                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            input.setText("");
+                        }}).create();
+            inputDialog.show();
+        } else {
+            inputDialog.show();
+        }
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        backToMenu.setOnClickListener(new BackToMenuClick());// 返回主菜单
+
+        loadData();
     }
 
-    //导入贴图数据
-    private void loadStickersData() {
-        if (mLoadStickersTask != null) {
-            mLoadStickersTask.cancel(true);
-        }
-        mLoadStickersTask = new LoadStickersTask();
-        mLoadStickersTask.execute(1);
-    }
-
-
-    /**
-     * 导入贴图数据
-     */
-    private final class LoadStickersTask extends AsyncTask<Integer, Void, Void> {
-        private Dialog loadDialog;
-
-        public LoadStickersTask() {
-            super();
-            loadDialog = BaseActivity.getLoadingDialog(getActivity(), "正在载入贴图数据...", false);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            loadDialog.show();
-        }
-
-        @Override
-        protected Void doInBackground(Integer... params) {
-            stickerBeanList.clear();
-            AssetManager assetManager = getActivity().getAssets();
-            try {
-                String[] lists = assetManager.list(STICKER_FOLDER);
-                for (String parentPath : lists) {
-
-                }//end for each
-            } catch (IOException e) {
-                e.printStackTrace();
+    public void loadData() {
+        try {
+            String[] pathArray = activity.getAssets().list(FONT_FOLDER);
+            for (int i = 0; i < pathArray.length; i++) {
+                String tempPath = FONT_FOLDER + File.separator + pathArray[i];
+                fonts.add(tempPath);
             }
-            return null;
-        }
-
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            loadDialog.dismiss();
-
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            loadDialog.dismiss();
-        }
-    }//end inner class
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mLoadStickersTask != null) {
-            mLoadStickersTask.cancel(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            fontTypeAdapter.notifyDataSetChanged();
         }
     }
 
     /**
-     * 从Assert文件夹中读取位图数据
+     * 生成文字图片
      *
      * @return
      */
-    private Bitmap drawToBitmap(String text) {
+    private Bitmap drawToBitmap(Typeface typeface, String text) {
+
+        if (typeface == null || text == null)
+            return null;
 
         TextView tempTextView = new TextView(activity);
-        tempTextView.setText("哈哈这是测试");
+        tempTextView.setText(text);
         tempTextView.setBackgroundResource(R.drawable.icon_biaoqian);
         tempTextView.setTextSize(10f);
+        tempTextView.setTypeface(typeface);
         tempTextView.setTextColor(Color.WHITE);
         tempTextView.setGravity(Gravity.CENTER_VERTICAL);
         tempTextView.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
 
-        if (tempTextView.getWidth() == 0 || tempTextView.getHeight() == 0) {//若是布局没有显示出来，先自己计算长宽
+        if (tempTextView.getWidth() == 0 || tempTextView.getHeight() == 0) {//计算图片长宽
             int measuredWidth = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
             int measuredHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
             // validate view.measurewidth and view.measureheight
@@ -210,8 +219,8 @@ public class TextFragment extends Fragment {
      *
      * @param path
      */
-    public void selectedStickerItem(String path) {
-        mLableTextView.addBitImage(drawToBitmap("123456"));
+    public void selectedStickerItem(Typeface typeface, String path) {
+        mLableTextView.addBitImage(drawToBitmap(typeface, path));
     }
 
     /**
@@ -235,6 +244,7 @@ public class TextFragment extends Fragment {
 
     /**
      * 保存贴图任务
+     *
      * @author panyi
      */
     private final class SaveTextTask extends

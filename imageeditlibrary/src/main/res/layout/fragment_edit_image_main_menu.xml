@@ -51,7 +51,7 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         android:drawablePadding="@dimen/image_edit_text_padding"
-        android:drawableTop="@drawable/image_edit_icon_text"
+        android:drawableTop="@drawable/image_edit_icon_rotate"
         android:gravity="center"
         android:text="@string/rotate"
         android:textColor="#ffffff"

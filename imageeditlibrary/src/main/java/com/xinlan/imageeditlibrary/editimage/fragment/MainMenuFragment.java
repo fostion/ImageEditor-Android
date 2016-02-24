@@ -158,7 +158,6 @@ public class MainMenuFragment extends Fragment {
 	private final class TextClick implements OnClickListener {
 		@Override
 		public void onClick(View v) {
-			Log.e("----","点击添加文字");
 			activity.mode = EditImageActivity.MODE_TEXT;
 			activity.mTextFragment.getmLableTextView().setVisibility(
 					View.VISIBLE);

@@ -2,11 +2,13 @@ package com.xinlan.imageeditandroid;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -26,6 +28,7 @@ import com.xinlan.imageeditlibrary.editimage.EditImageActivity;
 import com.xinlan.imageeditlibrary.picchooser.SelectPictureActivity;
 
 import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     public static final int SELECT_GALLERY_IMAGE_CODE = 7;
@@ -43,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private int imageWidth, imageHeight;//
     private String path;
 
-    private RelativeLayout srcText;
-    private ImageView targetText;
+    private String folder = "fonts";
+    private TextView targetText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,55 +69,9 @@ public class MainActivity extends AppCompatActivity {
         openAblum.setOnClickListener(new SelectClick());
         editImage.setOnClickListener(new EditImageClick());
 
-        srcText = (RelativeLayout) findViewById(R.id.srcText);
-        targetText = (ImageView) findViewById(R.id.targetText);
-
-        TextView myTextView = new TextView(this);
-        myTextView.setText("哈哈这是测试");
-        myTextView.setBackgroundResource(R.drawable.icon_biaoqian);
-        myTextView.setTextSize(10f);
-        myTextView.setTextColor(Color.WHITE);
-        myTextView.setGravity(Gravity.CENTER_VERTICAL);
-        myTextView.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT));
-
-        targetText.setImageBitmap(captureView(myTextView));
+        targetText = (TextView) findViewById(R.id.targetText);
     }
 
-    /**
-     * 获取view里面截图
-     *
-     * @param view
-     * @return
-     */
-    public Bitmap captureView(View view) {
-        if (view.getWidth() == 0 || view.getHeight() == 0) {//若是布局没有显示出来，先自己计算长宽
-            int measuredWidth = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            int measuredHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            // validate view.measurewidth and view.measureheight
-            view.measure(measuredWidth, measuredHeight);
-            view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
-        }
-        view.setDrawingCacheEnabled(true);
-        Bitmap bitmap = view.getDrawingCache();
-
-        if (bitmap == null) return null;
-        final Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
-                Bitmap.Config.ARGB_8888);
-
-        Canvas cv = new Canvas(newBitmap);
-        RectF dst = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-        try {
-            //截图将图片截取出来
-            cv.drawBitmap(bitmap, null, dst, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            //清除
-            view.setDrawingCacheEnabled(false);
-        }
-        return newBitmap;
-    }
 
     /**
      * 编辑选择的图片

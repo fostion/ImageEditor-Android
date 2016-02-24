@@ -202,7 +202,6 @@ public class StirckerFragment extends Fragment {
      * @return
      */
     private Bitmap getImageFromAssetsFile(String fileName) {
-        Log.e("---filename ---","  "+fileName);
         Bitmap image = null;
         AssetManager am = getResources().getAssets();
         try {
